@@ -1,0 +1,26 @@
+version: '2'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch
+    ports:
+      - '9200:9200'
+  kibana:
+    image: docker.elastic.co/kibana/kibana
+    ports: [ '5601:5601' ]
+    links: [ elasticsearch ]
+  logstash:
+    image: docker.elastic.co/logstash/logstash
+    #command: logstash  -w 4  --log.level warn -f /etc/logstash/conf.d/logstash.conf
+    #environment:
+    # This helps Logstash out if it gets too busy
+    #  - LS_HEAP_SIZE=2048m
+    volumes:
+    # volume mount the logstash config
+      - ./config:/usr/share/logstash/pipeline/
+    ports:
+      # beats port
+      - "5044:5044"
+      # Monitoring APIs -- https://www.elastic.co/guide/en/logstash/5.0/monitoring.html
+      - '9600:9600'
+    links:
+      - elasticsearch
